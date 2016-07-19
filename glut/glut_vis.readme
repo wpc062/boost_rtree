@@ -1,0 +1,6 @@
+g++ -I/usr/local/brion/boost/1.59.0_2/include ./glut_vis.cpp -o ./glut_vis -O2 -I/home/pwang/packages/glut-3.7/include -L/home/pwang/packages/glut-3.7/lib/glut/ -lglut -lGLU -lGL -L/usr/X11R6/lib64 -lXi -lXmu
+
+
+g++ -I/home/pwang/local/include ./glut_vis.cpp -o ./glut_vis -O2 -lglut -lGLU -lGL
+
+g++ -I/home/pwang/local/include ./rtree_glut.cpp -o ./rtree_glut -O2 -lglut -lGLU -lGL
