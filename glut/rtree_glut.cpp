@@ -84,9 +84,9 @@ inline size_t depth(RTree const& t)
 }
 
 template <typename RTree>
-inline void draw_tree(RTree const& tree)
+inline void draw_tree(RTree const& r, int max_level = 1000)
 {
-    bgi::detail::rtree::utilities::gl_draw(tree);
+    bgi::detail::rtree::utilities::gl_draw(r, 0, max_level);
 }
 
 template <typename Values, typename RTree>
@@ -181,15 +181,18 @@ void draw_multi_polygon(MultiPolygon const& multi_polygon)
 
 // render the scene -> tree, if searching data available also the query geometry and result
 bool search_valid = false;
-
+int g_max_level_draw = 1;
+bool g_depth_test = false;
+double g_center[2] = {0};
 
 void render_scene(void)
 {
+    boost::timer t;
     cout << "render scene\n";
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    draw_tree(*g_rtree);
+    draw_tree(*g_rtree, g_max_level_draw);
 
     if ( search_valid )
     {
@@ -204,6 +207,7 @@ void render_scene(void)
     }
 
     glFlush();
+    std::cout << "render scene: " << t.elapsed() << " sec." << std::endl;
 }
 
 void resize(int w, int h)
@@ -232,13 +236,25 @@ void resize(int w, int h)
 
     double xc = 0.5 * (bg::get<bg::min_corner, 0>(b) + bg::get<bg::max_corner, 0>(b)),
         yc = 0.5 * (bg::get<bg::min_corner, 1>(b) + bg::get<bg::max_corner, 1>(b));
+    g_center[0] = xc;
+    g_center[1] = yc;
 
     cout << "center: " << xc << ", " << yc << endl;
-    gluLookAt(
-        xc, yc, 150.0f, 
-        xc, yc, -150.0f,
-        0.0f, 1.0f, 0.0f);
-
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glCullFace(GL_FRONT);
+    if (g_depth_test) {
+        gluLookAt(
+            xc, yc, -100.0f, 
+            xc, yc, 100.0f,
+            0.0f, 1.0f, 0.0f);
+        glEnable(GL_DEPTH_TEST);    
+    } else {
+        gluLookAt(
+            xc, yc, 100.0f, 
+            xc, yc, -100.0f,
+            0.0f, 1.0f, 0.0f);
+        glDisable(GL_DEPTH_TEST); 
+    }
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glLineWidth(1.0f);
 
@@ -341,76 +357,45 @@ void test_boost_rtree(const char* bbox_filename)
 
 void mouse(int button, int state, int /*x*/, int /*y*/)
 {
-    // if ( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN )
-    // {
-    //     //insert_random_value(cont);
-    //     search_valid = false;
-    // }
-    // else if ( button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN )
-    // {
-    //     //remove_random_value(cont);
-    //     search_valid = false;
-    // }
-    // else if ( button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN )
-    // {
-    //     //search();
-    // }
+    if ( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN )
+    {
+        //insert_random_value(cont);
+        search_valid = false;
+        g_max_level_draw++;
+    }
+    else if ( button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN )
+    {
+        //remove_random_value(cont);
+        search_valid = false;
+        if (g_max_level_draw > 0)
+            g_max_level_draw--;
+    }
+    else if ( button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN )
+    {
+        //search();
+        g_depth_test = !g_depth_test;
+        if (g_depth_test) {
+            gluLookAt(
+                g_center[0], g_center[1], -100.0f, 
+                g_center[0], g_center[1], 100.0f,
+                0.0f, 1.0f, 0.0f);
+            glEnable(GL_DEPTH_TEST);    
+        } else {
+            gluLookAt(
+                g_center[0], g_center[1], 100.0f, 
+                g_center[0], g_center[1], -100.0f,
+                0.0f, 1.0f, 0.0f);
+            glDisable(GL_DEPTH_TEST); 
+        }
+    }
 
     glutPostRedisplay();
 }
 
 // handle keyboard input
-
-std::string current_line;
-
 void keyboard(unsigned char key, int /*x*/, int /*y*/)
 {
-    if ( key == '\r' || key == '\n' )
-    {
-        // if ( current_line == "storeb" )
-        // {
-        //     cont = containers<B>();
-        //     glutPostRedisplay();
-        // }
-        // else if ( current_line == "storep" )
-        // {
-        //     cont = containers<P>();
-        //     glutPostRedisplay();
-        // }
-        // else if ( current_line == "stores" )
-        // {
-        //     cont = containers<S>();
-        //     glutPostRedisplay();
-        // }
-        // else if ( current_line == "t" )
-        // {
-        //     std::cout << "\n";
-        //     //print_tree(cont);
-        //     std::cout << "\n";
-        // }
-        // else if ( current_line == "rand" )
-        // {
-        //     //insert_random_values(cont);
-        //     search_valid = false;
 
-        //     glutPostRedisplay();
-        // }
-        // else if ( current_line == "bulk" )
-        // {
-        //     //bulk_insert_random_values(cont);
-        //     search_valid = false;
-
-        //     glutPostRedisplay();
-        // }
-
-        current_line.clear();
-        std::cout << '\n';
-    }
-    else
-    {
-        current_line += key;
-        std::cout << key;
-    }
 }
 
 
