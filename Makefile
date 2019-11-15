@@ -1,2 +1,2 @@
 all:
-	g++ -o rtree_test -O2 -I/home/pwang/codeRoot/boost_1_59_0 rtree_test.cc
+	g++ -o rtree_test -O2 -I/path/to/boost_1_59_0/include rtree_test.cc
