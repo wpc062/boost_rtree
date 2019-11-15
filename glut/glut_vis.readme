@@ -1,4 +1,7 @@
-g++ -I/usr/local/brion/boost/1.59.0_2/include ./glut_vis.cpp -o ./glut_vis -O2 -I/home/pwang/packages/glut-3.7/include -L/home/pwang/packages/glut-3.7/lib/glut/ -lglut -lGLU -lGL -L/usr/X11R6/lib64 -lXi -lXmu
+glut_vis.cpp is modified based on an example boost library (libs/geometry/index/example/glut_vis.cpp).
+Need download glut library first.
+compile command: 
+g++ -I/path/to/boost/1.59.0_2/include ./glut_vis.cpp -o ./glut_vis -O2 -I/path/to/glut-3.7/include -L/path/to/glut-3.7/lib/glut/ -lglut -lGLU -lGL -L/usr/X11R6/lib64 -lXi -lXmu
 
 
 g++ -I/home/pwang/local/include ./glut_vis.cpp -o ./glut_vis -O2 -lglut -lGLU -lGL
